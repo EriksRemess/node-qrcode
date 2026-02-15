@@ -1,6 +1,6 @@
 import { test, mock } from 'node:test'
 import QRCode from '#lib/index'
-import StreamMock from '#test/mocks/writable-stream.js'
+import StreamMock from '#test/mocks/writable-stream'
 test('toFileStream png', async (t) => {
   await t.assert.rejects(() => QRCode.toFileStream('some text'),
     'Should reject if stream is not provided')

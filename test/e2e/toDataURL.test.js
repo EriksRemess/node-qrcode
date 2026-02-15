@@ -1,4 +1,6 @@
 import { test } from 'node:test'
+import jsQR from 'jsqr'
+import { PNG } from 'pngjs'
 import QRCode from '#lib/index'
 
 test('toDataURL - image/png', async (t) => {
@@ -37,4 +39,28 @@ test('toDataURL - image/png', async (t) => {
   }).catch((err) => {
     t.assert.ok(err, 'there should be an error (promise)')
   })
+})
+
+test('toDataURL - decoded text matches input', async (t) => {
+  const input = 'roundtrip-check-123'
+  const dataUrl = await QRCode.toDataURL(input, {
+    errorCorrectionLevel: 'M',
+    type: 'image/png'
+  })
+
+  const base64 = dataUrl.replace('data:image/png;base64,', '')
+  const pngBuffer = Buffer.from(base64, 'base64')
+  const png = PNG.sync.read(pngBuffer)
+  const imageData = new Uint8ClampedArray(
+    png.data.buffer,
+    png.data.byteOffset,
+    png.data.byteLength
+  )
+
+  const decoded = jsQR(imageData, png.width, png.height, {
+    inversionAttempts: 'dontInvert'
+  })
+
+  t.assert.ok(decoded, 'QR should be decodable')
+  t.assert.strictEqual(decoded.data, input, 'Decoded text should match input text')
 })

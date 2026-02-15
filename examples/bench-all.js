@@ -1,6 +1,6 @@
-import { runBenchmark as runSvgBenchmark } from './bench-svg-tostring.js'
-import { runBenchmark as runImageDataBenchmark } from './bench-image-data.js'
-import { getCliArgs, isMainModule } from './bench-runtime.js'
+import { runBenchmark as runSvgBenchmark } from '#examples/bench-svg-tostring'
+import { runBenchmark as runImageDataBenchmark } from '#examples/bench-image-data'
+import { getCliArgs, isMainModule } from '#examples/bench-runtime'
 
 async function main () {
   const args = getCliArgs()

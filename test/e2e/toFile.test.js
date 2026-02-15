@@ -4,7 +4,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import QRCode from '#lib/index'
-import StreamMock from '#test/mocks/writable-stream.js'
+import StreamMock from '#test/mocks/writable-stream'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

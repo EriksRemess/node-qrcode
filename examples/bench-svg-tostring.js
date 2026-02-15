@@ -5,7 +5,7 @@ import {
   isMainModule,
   nowMs,
   parseIntArg
-} from './bench-runtime.js'
+} from '#examples/bench-runtime'
 
 function generatePayload (size) {
   const chunk = 'https://example.com/path?q=node-qrcode&feature=svg-bench#'

@@ -22,9 +22,10 @@
     "./package.json": "./package.json"
   },
   "imports": {
-    "#lib/*": "./lib/*.js",
+    "#examples/*": "./examples/*.js",
     "#helper/*": "./helper/*.js",
-    "#test/*": "./test/*"
+    "#lib/*": "./lib/*.js",
+    "#test/*": "./test/*.js"
   },
   "files": [
     "lib",
@@ -42,14 +43,14 @@
     "bench:hotspots": "node examples/bench-hotspots.js"
   },
   "dependencies": {
-    "dijkstrajs": "^1.0.3",
     "pngjs": "^7.0.0"
   },
   "devDependencies": {
     "canvas": "^3.2.1",
     "eslint": "^10.0.0",
     "globals": "^17.3.0",
-    "htmlparser2": "^10.1.0"
+    "htmlparser2": "^10.1.0",
+    "jsqr": "^1.4.0"
   },
   "repository": {
     "type": "git",

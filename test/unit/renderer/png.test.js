@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import { PNG } from 'pngjs'
 import QRCode from '#lib/core/qrcode'
 import PngRenderer from '#lib/renderer/png'
-import StreamMock from '#test/mocks/writable-stream.js'
+import StreamMock from '#test/mocks/writable-stream'
 test('PNG renderer interface', () => {
   assert.strictEqual(typeof PngRenderer.render, 'function',
     'Should have render function')

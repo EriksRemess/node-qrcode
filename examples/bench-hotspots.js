@@ -1,14 +1,14 @@
 import QRCode from '#lib/index'
-import { create as createQRCode } from '../lib/core/qrcode.js'
-import SvgTagRenderer from '../lib/renderer/svg-tag.js'
-import Utils from '../lib/renderer/utils.js'
+import { create as createQRCode } from '#lib/core/qrcode'
+import SvgTagRenderer from '#lib/renderer/svg-tag'
+import Utils from '#lib/renderer/utils'
 import {
   getCliArgs,
   getRuntimeLabel,
   isMainModule,
   nowMs,
   parseIntArg
-} from './bench-runtime.js'
+} from '#examples/bench-runtime'
 
 function generatePayload (size) {
   const chunk = 'https://example.com/path?q=node-qrcode&feature=hotspots#'
