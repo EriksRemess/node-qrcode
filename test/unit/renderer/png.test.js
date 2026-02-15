@@ -71,24 +71,50 @@ test('PNG renderToDataURL', async () => {
 
   await new Promise((resolve, reject) => {
     PngRenderer.renderToDataURL(sampleQrData, { margin: 10, scale: 1 }, (err, url) => {
-        try {
-          assert.ok(!err, 'Should not generate errors with options param')
+      try {
+        assert.ok(!err, 'Should not generate errors with options param')
 
-          assert.strictEqual(typeof url, 'string',
-            'Should return a string')
+        assert.strictEqual(typeof url, 'string',
+          'Should return a string')
 
-          assert.strictEqual(url.split(',')[0], 'data:image/png;base64',
-            'Should have correct header')
+        assert.strictEqual(url.split(',')[0], 'data:image/png;base64',
+          'Should have correct header')
 
-          const b64png = url.split(',')[1]
-          assert.strictEqual(b64png.length % 4, 0,
-            'Should have a correct length')
-          resolve()
-        } catch (error) {
-          reject(error)
-        }
+        const b64png = url.split(',')[1]
+        assert.strictEqual(b64png.length % 4, 0,
+          'Should have a correct length')
+        resolve()
+      } catch (error) {
+        reject(error)
       }
-    )
+    })
+  })
+
+  await new Promise((resolve, reject) => {
+    PngRenderer.renderToDataURL(sampleQrData, {
+      margin: 10,
+      scale: 1,
+      rendererOpts: {
+        fastPng: true
+      }
+    }, (err, url) => {
+      try {
+        assert.ok(!err, 'Should not generate errors with fastPng mode')
+
+        assert.strictEqual(typeof url, 'string',
+          'Should return a string with fastPng mode')
+
+        assert.strictEqual(url.split(',')[0], 'data:image/png;base64',
+          'Should have correct header with fastPng mode')
+
+        const b64png = url.split(',')[1]
+        assert.strictEqual(b64png.length % 4, 0,
+          'Should have a correct length with fastPng mode')
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    })
   })
 })
 

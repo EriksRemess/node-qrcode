@@ -2,8 +2,9 @@
   "name": "qrcode",
   "description": "QRCode / 2d Barcode API for Node.js",
   "version": "1.5.4",
-  "author": "Ryan Day <soldair@gmail.com>",
+  "author": "Ēriks Remess <eriks@remess.lv>",
   "contributors": [
+    "Ryan Day <soldair@gmail.com>",
     "Vincenzo Greco <greco.vincenzo@gmail.com>",
     "Linus Unnebäck <linus@folkdatorn.se>"
   ],
@@ -29,12 +30,16 @@
     "lib",
     "helper"
   ],
-  "homepage": "http://github.com/soldair/node-qrcode",
+  "homepage": "http://github.com/EriksRemess/node-qrcode",
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "node --throw-deprecation test.js"
+    "test": "node --throw-deprecation test.js",
+    "bench:svg-string": "node examples/bench-svg-tostring.js",
+    "bench:image-data": "node examples/bench-image-data.js",
+    "bench:all": "node examples/bench-all.js",
+    "bench:hotspots": "node examples/bench-hotspots.js"
   },
   "dependencies": {
     "dijkstrajs": "^1.0.3",
@@ -48,7 +53,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/soldair/node-qrcode.git"
+    "url": "git://github.com/EriksRemess/node-qrcode.git"
   },
   "engines": {
     "node": ">=24.0.0"
