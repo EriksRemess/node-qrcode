@@ -1,13 +1,13 @@
-const test = require('tap').test
-const Version = require('core/version')
-const VersionCheck = require('core/version-check')
-const ECLevel = require('core/error-correction-level')
-const Mode = require('core/mode')
-const NumericData = require('core/numeric-data')
-const AlphanumericData = require('core/alphanumeric-data')
-const KanjiData = require('core/kanji-data')
-const ByteData = require('core/byte-data')
-
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import Version from '#lib/core/version'
+import VersionCheck from '#lib/core/version-check'
+import ECLevel from '#lib/core/error-correction-level'
+import Mode from '#lib/core/mode'
+import NumericData from '#lib/core/numeric-data'
+import AlphanumericData from '#lib/core/alphanumeric-data'
+import KanjiData from '#lib/core/kanji-data'
+import ByteData from '#lib/core/byte-data'
 const EC_LEVELS = [ECLevel.L, ECLevel.M, ECLevel.Q, ECLevel.H]
 
 const EXPECTED_NUMERIC_CAPACITY = [
@@ -70,66 +70,60 @@ const EXPECTED_VERSION_BITS = [
   0x27541, 0x28C69
 ]
 
-test('Version validity', function (t) {
-  t.notOk(VersionCheck.isValid(), 'Should return false if no input')
-  t.notOk(VersionCheck.isValid(''), 'Should return false if version is not a number')
-  t.notOk(VersionCheck.isValid(0), 'Should return false if version is not in range')
-  t.notOk(VersionCheck.isValid(41), 'Should return false if version is not in range')
-
-  t.end()
+test('Version validity', (t) => {
+  assert.ok(!VersionCheck.isValid(), 'Should return false if no input')
+  assert.ok(!VersionCheck.isValid(''), 'Should return false if version is not a number')
+  assert.ok(!VersionCheck.isValid(0), 'Should return false if version is not in range')
+  assert.ok(!VersionCheck.isValid(41), 'Should return false if version is not in range')
 })
 
-test('Version from value', function (t) {
-  t.equal(Version.from(5), 5, 'Should return correct version from a number')
-  t.equal(Version.from('5'), 5, 'Should return correct version from a string')
-  t.equal(Version.from(0, 1), 1, 'Should return default value if version is invalid')
-  t.equal(Version.from(null, 1), 1, 'Should return default value if version is undefined')
-
-  t.end()
+test('Version from value', (t) => {
+  assert.strictEqual(Version.from(5), 5, 'Should return correct version from a number')
+  assert.strictEqual(Version.from('5'), 5, 'Should return correct version from a string')
+  assert.strictEqual(Version.from(0, 1), 1, 'Should return default value if version is invalid')
+  assert.strictEqual(Version.from(null, 1), 1, 'Should return default value if version is undefined')
 })
 
-test('Version capacity', function (t) {
-  t.throws(function () { Version.getCapacity() }, 'Should throw if version is undefined')
-  t.throws(function () { Version.getCapacity('') }, 'Should throw if version is not a number')
-  t.throws(function () { Version.getCapacity(0) }, 'Should throw if version is not in range')
-  t.throws(function () { Version.getCapacity(41) }, 'Should throw if version is not in range')
+test('Version capacity', (t) => {
+  assert.throws(() => { Version.getCapacity() }, 'Should throw if version is undefined')
+  assert.throws(() => { Version.getCapacity('') }, 'Should throw if version is not a number')
+  assert.throws(() => { Version.getCapacity(0) }, 'Should throw if version is not in range')
+  assert.throws(() => { Version.getCapacity(41) }, 'Should throw if version is not in range')
 
   for (let l = 0; l < EC_LEVELS.length; l++) {
     for (let i = 1; i <= 40; i++) {
-      t.equal(Version.getCapacity(i, EC_LEVELS[l], Mode.NUMERIC),
+      assert.strictEqual(Version.getCapacity(i, EC_LEVELS[l], Mode.NUMERIC),
         EXPECTED_NUMERIC_CAPACITY[i - 1][l], 'Should return correct numeric mode capacity')
 
-      t.equal(Version.getCapacity(i, EC_LEVELS[l], Mode.ALPHANUMERIC),
+      assert.strictEqual(Version.getCapacity(i, EC_LEVELS[l], Mode.ALPHANUMERIC),
         EXPECTED_ALPHANUMERIC_CAPACITY[i - 1][l], 'Should return correct alphanumeric mode capacity')
 
-      t.equal(Version.getCapacity(i, EC_LEVELS[l], Mode.KANJI),
+      assert.strictEqual(Version.getCapacity(i, EC_LEVELS[l], Mode.KANJI),
         EXPECTED_KANJI_CAPACITY[i - 1][l], 'Should return correct kanji mode capacity')
 
-      t.equal(Version.getCapacity(i, EC_LEVELS[l], Mode.BYTE),
+      assert.strictEqual(Version.getCapacity(i, EC_LEVELS[l], Mode.BYTE),
         EXPECTED_BYTE_CAPACITY[i - 1][l], 'Should return correct byte mode capacity')
 
-      t.equal(Version.getCapacity(i, EC_LEVELS[l]),
+      assert.strictEqual(Version.getCapacity(i, EC_LEVELS[l]),
         EXPECTED_BYTE_CAPACITY[i - 1][l], 'Should return correct byte mode capacity')
     }
   }
-
-  t.end()
 })
 
-test('Version best match', function (t) {
+test('Version best match', (t) => {
   function testBestVersionForCapacity (expectedCapacity, DataCtor) {
     for (let v = 0; v < 40; v++) {
       for (let l = 0; l < EC_LEVELS.length; l++) {
         const capacity = expectedCapacity[v][l]
-        const data = new DataCtor(new Array(capacity + 1).join('-'))
+        const data = new DataCtor('-'.repeat(capacity))
 
-        t.equal(Version.getBestVersionForData(data, EC_LEVELS[l]), v + 1, 'Should return best version')
-        t.equal(Version.getBestVersionForData([data], EC_LEVELS[l]), v + 1, 'Should return best version')
+        assert.strictEqual(Version.getBestVersionForData(data, EC_LEVELS[l]), v + 1, 'Should return best version')
+        assert.strictEqual(Version.getBestVersionForData([data], EC_LEVELS[l]), v + 1, 'Should return best version')
 
         if (l === 1) {
-          t.equal(Version.getBestVersionForData(data, null), v + 1,
+          assert.strictEqual(Version.getBestVersionForData(data, null), v + 1,
             'Should return best version for ECLevel.M if error level is undefined')
-          t.equal(Version.getBestVersionForData([data], null), v + 1,
+          assert.strictEqual(Version.getBestVersionForData([data], null), v + 1,
             'Should return best version for ECLevel.M if error level is undefined')
         }
       }
@@ -137,17 +131,17 @@ test('Version best match', function (t) {
 
     for (let i = 0; i < EC_LEVELS.length; i++) {
       const exceededCapacity = expectedCapacity[39][i] + 1
-      const tooBigData = new DataCtor(new Array(exceededCapacity + 1).join('-'))
+      const tooBigData = new DataCtor('-'.repeat(exceededCapacity))
       const tooBigDataArray = [
-        new DataCtor(new Array(Math.floor(exceededCapacity / 2)).join('-')),
-        new DataCtor(new Array(Math.floor(exceededCapacity / 2) + 1).join('-'))
+        new DataCtor('-'.repeat(Math.floor(exceededCapacity / 2) - 1)),
+        new DataCtor('-'.repeat(Math.floor(exceededCapacity / 2)))
       ]
 
-      t.notOk(Version.getBestVersionForData(tooBigData, EC_LEVELS[i]),
+      assert.ok(!Version.getBestVersionForData(tooBigData, EC_LEVELS[i]),
         'Should return undefined if data is too big')
-      t.notOk(Version.getBestVersionForData([tooBigData], EC_LEVELS[i]),
+      assert.ok(!Version.getBestVersionForData([tooBigData], EC_LEVELS[i]),
         'Should return undefined if data is too big')
-      t.notOk(Version.getBestVersionForData(tooBigDataArray, EC_LEVELS[i]),
+      assert.ok(!Version.getBestVersionForData(tooBigDataArray, EC_LEVELS[i]),
         'Should return undefined if data is too big')
     }
   }
@@ -157,27 +151,23 @@ test('Version best match', function (t) {
   testBestVersionForCapacity(EXPECTED_KANJI_CAPACITY, KanjiData)
   testBestVersionForCapacity(EXPECTED_BYTE_CAPACITY, ByteData)
 
-  t.ok(Version.getBestVersionForData([new ByteData('abc'), new NumericData('1234')]),
+  assert.ok(Version.getBestVersionForData([new ByteData('abc'), new NumericData('1234')]),
     'Should return a version number if input array is valid')
 
-  t.equal(Version.getBestVersionForData([]), 1,
+  assert.strictEqual(Version.getBestVersionForData([]), 1,
     'Should return 1 if array is empty')
-
-  t.end()
 })
 
-test('Version encoded info', function (t) {
+test('Version encoded info', (t) => {
   let v
 
   for (v = 0; v < 7; v++) {
-    t.throws(function () { Version.getEncodedBits(v) },
+    assert.throws(() => { Version.getEncodedBits(v) },
       'Should throw if version is invalid or less than 7')
   }
 
   for (v = 7; v <= 40; v++) {
     const bch = Version.getEncodedBits(v)
-    t.equal(bch, EXPECTED_VERSION_BITS[v - 7], 'Should return correct bits')
+    assert.strictEqual(bch, EXPECTED_VERSION_BITS[v - 7], 'Should return correct bits')
   }
-
-  t.end()
 })

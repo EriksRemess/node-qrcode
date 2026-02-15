@@ -1,22 +1,20 @@
-const test = require('tap').test
-const { Canvas, createCanvas } = require('canvas')
-const QRCode = require('core/qrcode')
-const CanvasRenderer = require('renderer/canvas')
-
-test('CanvasRenderer interface', function (t) {
-  t.type(CanvasRenderer.render, 'function',
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import { Canvas, createCanvas } from 'canvas'
+import QRCode from '#lib/core/qrcode'
+import CanvasRenderer from '#lib/renderer/canvas'
+test('CanvasRenderer interface', () => {
+  assert.strictEqual(typeof CanvasRenderer.render, 'function',
     'Should have render function')
 
-  t.type(CanvasRenderer.renderToDataURL, 'function',
+  assert.strictEqual(typeof CanvasRenderer.renderToDataURL, 'function',
     'Should have renderToDataURL function')
-
-  t.end()
 })
 
-test('CanvasRenderer render', function (t) {
+test('CanvasRenderer render', (t) => {
   // Mock document object
   global.document = {
-    createElement: function (el) {
+    createElement: (el) => {
       if (el === 'canvas') {
         return createCanvas(200, 200)
       }
@@ -26,13 +24,13 @@ test('CanvasRenderer render', function (t) {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   let canvasEl
 
-  t.notThrow(function () { canvasEl = CanvasRenderer.render(sampleQrData) },
+  assert.doesNotThrow(() => { canvasEl = CanvasRenderer.render(sampleQrData) },
     'Should not throw if canvas is not provided')
 
-  t.ok(canvasEl instanceof Canvas,
+  assert.ok(canvasEl instanceof Canvas,
     'Should return a new canvas object')
 
-  t.notThrow(function () {
+  assert.doesNotThrow(() => {
     canvasEl = CanvasRenderer.render(sampleQrData, {
       margin: 10,
       scale: 1
@@ -40,28 +38,26 @@ test('CanvasRenderer render', function (t) {
   }, 'Should not throw with options param')
 
   // modules: 25, margins: 10 * 2, scale: 1
-  t.equal(canvasEl.width, 25 + 10 * 2,
+  assert.strictEqual(canvasEl.width, 25 + 10 * 2,
     'Should have correct size')
 
-  t.equal(canvasEl.width, canvasEl.height,
+  assert.strictEqual(canvasEl.width, canvasEl.height,
     'Should be a square image')
 
   global.document = undefined
 
-  t.throw(function () { canvasEl = CanvasRenderer.render(sampleQrData) },
+  assert.throws(() => { canvasEl = CanvasRenderer.render(sampleQrData) },
     'Should throw if canvas cannot be created')
-
-  t.end()
 })
 
-test('CanvasRenderer render to provided canvas', function (t) {
+test('CanvasRenderer render to provided canvas', (t) => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   const canvasEl = createCanvas(200, 200)
 
-  t.notThrow(function () { CanvasRenderer.render(sampleQrData, canvasEl) },
+  assert.doesNotThrow(() => { CanvasRenderer.render(sampleQrData, canvasEl) },
     'Should not throw with only qrData and canvas param')
 
-  t.notThrow(function () {
+  assert.doesNotThrow(() => {
     CanvasRenderer.render(sampleQrData, canvasEl, {
       margin: 10,
       scale: 1
@@ -69,19 +65,17 @@ test('CanvasRenderer render to provided canvas', function (t) {
   }, 'Should not throw with options param')
 
   // modules: 25, margins: 10 * 2, scale: 1
-  t.equal(canvasEl.width, 25 + 10 * 2,
+  assert.strictEqual(canvasEl.width, 25 + 10 * 2,
     'Should have correct size')
 
-  t.equal(canvasEl.width, canvasEl.height,
+  assert.strictEqual(canvasEl.width, canvasEl.height,
     'Should be a square image')
-
-  t.end()
 })
 
-test('CanvasRenderer renderToDataURL', function (t) {
+test('CanvasRenderer renderToDataURL', () => {
   // Mock document object
   global.document = {
-    createElement: function (el) {
+    createElement: (el) => {
       if (el === 'canvas') {
         return createCanvas(200, 200)
       }
@@ -91,10 +85,10 @@ test('CanvasRenderer renderToDataURL', function (t) {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   let url
 
-  t.notThrow(function () { url = CanvasRenderer.renderToDataURL(sampleQrData) },
+  assert.doesNotThrow(() => { url = CanvasRenderer.renderToDataURL(sampleQrData) },
     'Should not throw if canvas is not provided')
 
-  t.notThrow(function () {
+  assert.doesNotThrow(() => {
     url = CanvasRenderer.renderToDataURL(sampleQrData, {
       margin: 10,
       scale: 1,
@@ -102,30 +96,29 @@ test('CanvasRenderer renderToDataURL', function (t) {
     })
   }, 'Should not throw with options param')
 
-  t.type(url, 'string',
+  assert.strictEqual(typeof url, 'string',
     'Should return a string')
 
-  t.equal(url.split(',')[0], 'data:image/png;base64',
+  assert.strictEqual(url.split(',')[0], 'data:image/png;base64',
     'Should have correct header')
 
   const b64png = url.split(',')[1]
-  t.equal(b64png.length % 4, 0,
+  assert.strictEqual(b64png.length % 4, 0,
     'Should have a correct length')
 
   global.document = undefined
-  t.end()
 })
 
-test('CanvasRenderer renderToDataURL to provided canvas', function (t) {
+test('CanvasRenderer renderToDataURL to provided canvas', () => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   const canvasEl = createCanvas(200, 200)
   let url
 
-  t.notThrow(function () {
+  assert.doesNotThrow(() => {
     url = CanvasRenderer.renderToDataURL(sampleQrData, canvasEl)
   }, 'Should not throw with only qrData and canvas param')
 
-  t.notThrow(function () {
+  assert.doesNotThrow(() => {
     url = CanvasRenderer.renderToDataURL(sampleQrData, canvasEl, {
       margin: 10,
       scale: 1,
@@ -133,15 +126,13 @@ test('CanvasRenderer renderToDataURL to provided canvas', function (t) {
     })
   }, 'Should not throw with options param')
 
-  t.type(url, 'string',
+  assert.strictEqual(typeof url, 'string',
     'Should return a string')
 
-  t.equal(url.split(',')[0], 'data:image/png;base64',
+  assert.strictEqual(url.split(',')[0], 'data:image/png;base64',
     'Should have correct header')
 
   const b64png = url.split(',')[1]
-  t.equal(b64png.length % 4, 0,
+  assert.strictEqual(b64png.length % 4, 0,
     'Should have a correct length')
-
-  t.end()
 })

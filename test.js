@@ -1,5 +1,9 @@
-const spawn = require('child_process').spawn
-const path = require('path')
+import { spawn } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const opt = {
   cwd: __dirname,
@@ -11,7 +15,6 @@ const opt = {
 }
 
 spawn('node', [
-  'node_modules/.bin/tap',
-  '--cov', '--100',
+  '--test',
   process.argv[2] || 'test/**/*.test.js'
 ], opt)

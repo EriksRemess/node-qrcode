@@ -1,55 +1,60 @@
-const test = require('tap').test
-const sinon = require('sinon')
-const QRCode = require('lib')
-const StreamMock = require('../mocks/writable-stream')
+import { test, mock } from 'node:test'
+import QRCode from '#lib/index'
+import StreamMock from '#test/mocks/writable-stream.js'
+test('toFileStream png', async (t) => {
+  await t.assert.rejects(() => QRCode.toFileStream('some text'),
+    'Should reject if stream is not provided')
 
-test('toFileStream png', function (t) {
-  t.throw(function () { QRCode.toFileStream('some text') },
-    'Should throw if stream is not provided')
-
-  t.throw(function () { QRCode.toFileStream(new StreamMock()) },
-    'Should throw if text is not provided')
+  await t.assert.rejects(() => QRCode.toFileStream(new StreamMock()),
+    'Should reject if text is not provided')
 
   const fstream = new StreamMock()
-  const spy = sinon.spy(fstream, 'emit')
+  const spy = mock.method(fstream, 'emit', function (...args) {
+    return StreamMock.prototype.emit.apply(this, args)
+  })
 
-  QRCode.toFileStream(fstream, 'i am a pony!')
+  await QRCode.toFileStream(fstream, 'i am a pony!')
 
-  QRCode.toFileStream(fstream, 'i am a pony!', {
+  await QRCode.toFileStream(fstream, 'i am a pony!', {
     type: 'image/png'
   })
 
-  t.ok(spy.neverCalledWith('error'),
+  t.assert.ok(spy.mock.calls.every((call) => { return call.arguments[0] !== 'error' }),
     'There should be no error')
 
-  spy.restore()
-  t.end()
+  spy.mock.restore()
 })
 
-test('toFileStream png with write error', function (t) {
+test('toFileStream png with write error', (t) => {
   const fstreamErr = new StreamMock().forceErrorOnWrite()
-  QRCode.toFileStream(fstreamErr, 'i am a pony!')
+  return new Promise((resolve, reject) => {
+    fstreamErr.on('error', (e) => {
+      try {
+        t.assert.ok(e, 'Should return an error')
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    })
 
-  t.plan(2)
-
-  fstreamErr.on('error', function (e) {
-    t.ok(e, 'Should return an error')
+    QRCode.toFileStream(fstreamErr, 'i am a pony!')
   })
 })
 
-test('toFileStream png with qrcode error', function (t) {
+test('toFileStream png with qrcode error', async (t) => {
   const fstreamErr = new StreamMock()
-  const bigString = Array(200).join('i am a pony!')
+  const bigString = 'i am a pony!'.repeat(199)
 
-  t.plan(2)
+  await QRCode.toFileStream(fstreamErr, bigString).then(
+    () => t.assert.fail('Expected qrcode overflow error'),
+    (e) => t.assert.ok(e, 'Should return an error')
+  )
 
-  fstreamErr.on('error', function (e) {
-    t.ok(e, 'Should return an error')
-  })
-
-  QRCode.toFileStream(fstreamErr, bigString)
-  QRCode.toFileStream(fstreamErr, 'i am a pony!', {
+  await QRCode.toFileStream(fstreamErr, 'i am a pony!', {
     version: 1, // force version=1 to trigger an error
     errorCorrectionLevel: 'H'
-  })
+  }).then(
+    () => t.assert.fail('Expected invalid version/data error'),
+    (e) => t.assert.ok(e, 'Should return an error')
+  )
 })

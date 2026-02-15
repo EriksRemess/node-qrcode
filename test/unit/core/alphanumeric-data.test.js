@@ -1,8 +1,8 @@
-const test = require('tap').test
-const BitBuffer = require('core/bit-buffer')
-const AlphanumericData = require('core/alphanumeric-data')
-const Mode = require('core/mode')
-
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import BitBuffer from '#lib/core/bit-buffer'
+import AlphanumericData from '#lib/core/alphanumeric-data'
+import Mode from '#lib/core/mode'
 const testData = [
   {
     data: 'A',
@@ -24,18 +24,16 @@ const testData = [
   }
 ]
 
-test('Alphanumeric Data', function (t) {
-  testData.forEach(function (data) {
+test('Alphanumeric Data', (t) => {
+  testData.forEach((data) => {
     const alphanumericData = new AlphanumericData(data.data)
 
-    t.equal(alphanumericData.mode, Mode.ALPHANUMERIC, 'Mode should be ALPHANUMERIC')
-    t.equal(alphanumericData.getLength(), data.length, 'Should return correct length')
-    t.equal(alphanumericData.getBitsLength(), data.bitLength, 'Should return correct bit length')
+    assert.strictEqual(alphanumericData.mode, Mode.ALPHANUMERIC, 'Mode should be ALPHANUMERIC')
+    assert.strictEqual(alphanumericData.getLength(), data.length, 'Should return correct length')
+    assert.strictEqual(alphanumericData.getBitsLength(), data.bitLength, 'Should return correct bit length')
 
     const bitBuffer = new BitBuffer()
     alphanumericData.write(bitBuffer)
-    t.deepEqual(bitBuffer.buffer, data.dataBit, 'Should write correct data to buffer')
+    assert.deepStrictEqual(bitBuffer.buffer, data.dataBit, 'Should write correct data to buffer')
   })
-
-  t.end()
 })

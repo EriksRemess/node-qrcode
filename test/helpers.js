@@ -1,13 +1,18 @@
 const nativePromise = global.Promise
 
-exports.removeNativePromise = function () {
+export function removeNativePromise () {
   if (global.Promise) {
     delete global.Promise
   }
 }
 
-exports.restoreNativePromise = function () {
+export function restoreNativePromise () {
   if (!global.Promise) {
     global.Promise = nativePromise
   }
+}
+
+export default {
+  removeNativePromise,
+  restoreNativePromise
 }

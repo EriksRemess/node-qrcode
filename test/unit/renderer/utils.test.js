@@ -1,7 +1,7 @@
-const test = require('tap').test
-const Utils = require('renderer/utils')
-
-test('Utils getOptions', function (t) {
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import Utils from '#lib/renderer/utils'
+test('Utils getOptions', (t) => {
   const defaultOptions = {
     width: undefined,
     scale: 4,
@@ -14,82 +14,76 @@ test('Utils getOptions', function (t) {
     rendererOpts: {}
   }
 
-  t.ok(Utils.getOptions,
+  assert.ok(Utils.getOptions,
     'getOptions should be defined')
 
-  t.deepEqual(Utils.getOptions(), defaultOptions,
+  assert.deepStrictEqual(Utils.getOptions(), defaultOptions,
     'Should return default options if called without param')
 
-  t.equal(Utils.getOptions({ scale: 8 }).scale, 8,
+  assert.strictEqual(Utils.getOptions({ scale: 8 }).scale, 8,
     'Should return correct scale value')
 
-  t.equal(Utils.getOptions({ width: 300 }).scale, 4,
+  assert.strictEqual(Utils.getOptions({ width: 300 }).scale, 4,
     'Should reset scale value to default if width is set')
 
-  t.equal(Utils.getOptions({ margin: null }).margin, 4,
+  assert.strictEqual(Utils.getOptions({ margin: null }).margin, 4,
     'Should return default margin if specified value is null')
 
-  t.equal(Utils.getOptions({ margin: -1 }).margin, 4,
+  assert.strictEqual(Utils.getOptions({ margin: -1 }).margin, 4,
     'Should return default margin if specified value is < 0')
 
-  t.equal(Utils.getOptions({ margin: 20 }).margin, 20,
+  assert.strictEqual(Utils.getOptions({ margin: 20 }).margin, 20,
     'Should return correct margin value')
 
-  t.deepEqual(Utils.getOptions({ color: { dark: '#fff', light: '#000000' } }).color,
+  assert.deepStrictEqual(Utils.getOptions({ color: { dark: '#fff', light: '#000000' } }).color,
     {
       dark: { r: 255, g: 255, b: 255, a: 255, hex: '#ffffff' },
       light: { r: 0, g: 0, b: 0, a: 255, hex: '#000000' }
     },
     'Should return correct colors value from strings')
 
-  t.deepEqual(Utils.getOptions({ color: { dark: 111, light: 999 } }).color,
+  assert.deepStrictEqual(Utils.getOptions({ color: { dark: 111, light: 999 } }).color,
     {
       dark: { r: 17, g: 17, b: 17, a: 255, hex: '#111111' },
       light: { r: 153, g: 153, b: 153, a: 255, hex: '#999999' }
     },
     'Should return correct colors value from numbers')
 
-  t.throw(function () { Utils.getOptions({ color: { dark: true } }) },
+  assert.throws(() => { Utils.getOptions({ color: { dark: true } }) },
     'Should throw if color is not a string')
 
-  t.throw(function () { Utils.getOptions({ color: { dark: '#aa' } }) },
+  assert.throws(() => { Utils.getOptions({ color: { dark: '#aa' } }) },
     'Should throw if color is not in a valid hex format')
-
-  t.end()
 })
 
-test('Utils getScale', function (t) {
+test('Utils getScale', (t) => {
   const symbolSize = 21
 
-  t.equal(Utils.getScale(symbolSize, { scale: 5 }), 5,
+  assert.strictEqual(Utils.getScale(symbolSize, { scale: 5 }), 5,
     'Should return correct scale value')
 
-  t.equal(Utils.getScale(symbolSize, { width: 50, margin: 2 }), 2,
+  assert.strictEqual(Utils.getScale(symbolSize, { width: 50, margin: 2 }), 2,
     'Should calculate correct scale from width and margin')
 
-  t.equal(Utils.getScale(symbolSize, { width: 21, margin: 2, scale: 4 }), 4,
+  assert.strictEqual(Utils.getScale(symbolSize, { width: 21, margin: 2, scale: 4 }), 4,
     'Should return default scale if width is too small to contain the symbol')
-
-  t.end()
 })
 
-test('Utils getImageWidth', function (t) {
+test('Utils getImageWidth', (t) => {
   const symbolSize = 21
 
-  t.equal(Utils.getImageWidth(symbolSize, { scale: 5, margin: 0 }), 105,
+  assert.strictEqual(Utils.getImageWidth(symbolSize, { scale: 5, margin: 0 }), 105,
     'Should return correct width value')
 
-  t.equal(Utils.getImageWidth(symbolSize, { width: 250, margin: 2 }), 250,
+  assert.strictEqual(Utils.getImageWidth(symbolSize, { width: 250, margin: 2 }), 250,
     'Should return specified width value')
 
-  t.equal(Utils.getImageWidth(symbolSize, { width: 10, margin: 4, scale: 4 }), 116,
+  assert.strictEqual(Utils.getImageWidth(symbolSize, { width: 10, margin: 4, scale: 4 }), 116,
     'Should ignore width option if too small to contain the symbol')
-
-  t.end()
 })
 
-test('Utils qrToImageData', function (t) {
-  t.ok(Utils.qrToImageData,
+test('Utils qrToImageData', (t) => {
+  assert.ok(Utils.qrToImageData,
     'qrToImageData should be defined')
 
   const sampleQrData = {
@@ -125,7 +119,7 @@ test('Utils qrToImageData', function (t) {
 
   Utils.qrToImageData(imageData, sampleQrData, opts)
 
-  t.equal(imageData.length, expectedImageDataLength,
+  assert.strictEqual(imageData.length, expectedImageDataLength,
     'Should return correct imageData length')
 
   imageData = []
@@ -134,8 +128,6 @@ test('Utils qrToImageData', function (t) {
 
   Utils.qrToImageData(imageData, sampleQrData, opts)
 
-  t.equal(imageData.length, expectedImageDataLength,
+  assert.strictEqual(imageData.length, expectedImageDataLength,
     'Should return correct imageData length')
-
-  t.end()
 })

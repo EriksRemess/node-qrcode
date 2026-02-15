@@ -1,12 +1,12 @@
-const test = require('tap').test
-const Mode = require('core/mode')
-const Segments = require('core/segments')
-const NumericData = require('core/numeric-data')
-const AlphanumericData = require('core/alphanumeric-data')
-const ByteData = require('core/byte-data')
-const toSJIS = require('helper/to-sjis')
-const Utils = require('core/utils')
-
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import Mode from '#lib/core/mode'
+import Segments from '#lib/core/segments'
+import NumericData from '#lib/core/numeric-data'
+import AlphanumericData from '#lib/core/alphanumeric-data'
+import ByteData from '#lib/core/byte-data'
+import toSJIS from '#helper/to-sjis'
+import Utils from '#lib/core/utils'
 let testData = [
   {
     input: '1A1',
@@ -162,60 +162,54 @@ const kanjiTestData = [
 
 testData = testData.concat(kanjiTestData)
 
-test('Segments from array', function (t) {
-  t.deepEqual(
+test('Segments from array', (t) => {
+  assert.deepStrictEqual(
     Segments.fromArray(['abcdef', '12345']),
     [new ByteData('abcdef'), new NumericData('12345')],
     'Should return correct segment from array of string')
 
-  t.deepEqual(
+  assert.deepStrictEqual(
     Segments.fromArray([{ data: 'abcdef', mode: Mode.BYTE }, { data: '12345', mode: Mode.NUMERIC }]),
     [new ByteData('abcdef'), new NumericData('12345')],
     'Should return correct segment from array of objects')
 
-  t.deepEqual(
+  assert.deepStrictEqual(
     Segments.fromArray([{ data: 'abcdef', mode: 'byte' }, { data: '12345', mode: 'numeric' }]),
     [new ByteData('abcdef'), new NumericData('12345')],
     'Should return correct segment from array of objects if mode is specified as string')
 
-  t.deepEqual(
+  assert.deepStrictEqual(
     Segments.fromArray([{ data: 'abcdef' }, { data: '12345' }]),
     [new ByteData('abcdef'), new NumericData('12345')],
     'Should return correct segment from array of objects if mode is not specified')
 
-  t.deepEqual(Segments.fromArray([{}]), [],
+  assert.deepStrictEqual(Segments.fromArray([{}]), [],
     'Should return an empty array')
 
-  t.throw(function () { Segments.fromArray([{ data: 'ABCDE', mode: 'numeric' }]) },
+  assert.throws(() => { Segments.fromArray([{ data: 'ABCDE', mode: 'numeric' }]) },
     'Should throw if segment cannot be encoded with specified mode')
 
-  t.deepEqual(
+  assert.deepStrictEqual(
     Segments.fromArray([{ data: '０１２３', mode: Mode.KANJI }]), [new ByteData('０１２３')],
     'Should use Byte mode if kanji support is disabled')
-
-  t.end()
 })
 
-test('Segments optimization', function (t) {
-  t.deepEqual(Segments.fromString('乂ЁЖ', 1), Segments.fromArray([{ data: '乂ЁЖ', mode: 'byte' }]),
+test('Segments optimization', (t) => {
+  assert.deepStrictEqual(Segments.fromString('乂ЁЖ', 1), Segments.fromArray([{ data: '乂ЁЖ', mode: 'byte' }]),
     'Should use Byte mode if Kanji support is disabled')
 
   Utils.setToSJISFunction(toSJIS)
-  testData.forEach(function (data) {
-    t.deepEqual(Segments.fromString(data.input, 1), Segments.fromArray(data.result))
+  testData.forEach((data) => {
+    assert.deepStrictEqual(Segments.fromString(data.input, 1), Segments.fromArray(data.result))
   })
-
-  t.end()
 })
 
-test('Segments raw split', function (t) {
+test('Segments raw split', (t) => {
   const splitted = [
     new ByteData('abc'),
     new AlphanumericData('DEF'),
     new NumericData('123')
   ]
 
-  t.deepEqual(Segments.rawSplit('abcDEF123'), splitted)
-
-  t.end()
+  assert.deepStrictEqual(Segments.rawSplit('abcDEF123'), splitted)
 })

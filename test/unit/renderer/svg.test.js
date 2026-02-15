@@ -1,35 +1,34 @@
-const test = require('tap').test
-const sinon = require('sinon')
-const fs = require('fs')
-const htmlparser = require('htmlparser2')
-const QRCode = require('core/qrcode')
-const SvgRenderer = require('renderer/svg')
-
+import { test, mock } from 'node:test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import { Parser } from 'htmlparser2'
+import QRCode from '#lib/core/qrcode'
+import SvgRenderer from '#lib/renderer/svg'
 function getExpectedViewbox (size, margin) {
   const expectedQrCodeSize = size + margin * 2
   return '0 0 ' + expectedQrCodeSize + ' ' + expectedQrCodeSize
 }
 
 function testSvgFragment (t, svgFragment, expectedTags) {
-  return new Promise(function (resolve, reject) {
-    const parser = new htmlparser.Parser({
-      onopentag: function (name, attribs) {
+  return new Promise((resolve, reject) => {
+    const parser = new Parser({
+      onopentag: (name, attribs) => {
         const tag = expectedTags.shift()
 
-        t.equal(tag.name, name,
+        assert.strictEqual(tag.name, name,
           'Should have a ' + tag.name + ' tag')
 
-        tag.attribs.forEach(function (attr) {
-          t.equal(attribs[attr.name], attr.value.toString(),
+        tag.attribs.forEach((attr) => {
+          assert.strictEqual(attribs[attr.name], attr.value.toString(),
             'Should have attrib ' + attr.name + ' with value ' + attr.value)
         })
       },
 
-      onend: function () {
+      onend: () => {
         resolve()
       },
 
-      onerror: function (e) {
+      onerror: (e) => {
         reject(e)
       }
     }, { decodeEntities: true })
@@ -44,17 +43,15 @@ function buildTest (t, data, opts, expectedTags) {
   return testSvgFragment(t, svg, expectedTags.slice())
 }
 
-test('svgrender interface', function (t) {
-  t.type(SvgRenderer.render, 'function',
+test('svgrender interface', () => {
+  assert.strictEqual(typeof SvgRenderer.render, 'function',
     'Should have render function')
 
-  t.type(SvgRenderer.renderToFile, 'function',
+  assert.strictEqual(typeof SvgRenderer.renderToFile, 'function',
     'Should have renderToFile function')
-
-  t.end()
 })
 
-test('Svg render', function (t) {
+test('Svg render', (t) => {
   const tests = []
 
   const data = QRCode.create('sample text', { version: 2 })
@@ -135,44 +132,65 @@ test('Svg render', function (t) {
     { name: 'path', attribs: [{ name: 'stroke', value: '#000000' }] }
   ]))
 
-  Promise.all(tests).then(function () {
-    t.end()
-  })
+  return Promise.all(tests)
 })
 
-test('Svg renderToFile', function (t) {
+test('Svg renderToFile', async () => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   const fileName = 'qrimage.svg'
-  let fsStub = sinon.stub(fs, 'writeFile').callsArg(2)
-
-  t.plan(5)
-
-  SvgRenderer.renderToFile(fileName, sampleQrData, function (err) {
-    t.ok(!err,
-      'Should not generate errors with only qrData param')
-
-    t.equal(fsStub.getCall(0).args[0], fileName,
-      'Should save file with correct file name')
+  const writeCalls = []
+  let fsStub = mock.method(fs, 'writeFile', (file, data, cb) => {
+    writeCalls.push(file)
+    cb()
   })
 
-  SvgRenderer.renderToFile(fileName, sampleQrData, {
-    margin: 10,
-    scale: 1
-  }, function (err) {
-    t.ok(!err,
-      'Should not generate errors with options param')
-
-    t.equal(fsStub.getCall(0).args[0], fileName,
-      'Should save file with correct file name')
+  await new Promise((resolve, reject) => {
+    SvgRenderer.renderToFile(fileName, sampleQrData, (err) => {
+      try {
+        assert.ok(!err,
+          'Should not generate errors with only qrData param')
+        assert.strictEqual(writeCalls[0], fileName,
+          'Should save file with correct file name')
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    })
   })
 
-  fsStub.restore()
-  fsStub = sinon.stub(fs, 'writeFile').callsArgWith(2, new Error())
-
-  SvgRenderer.renderToFile(fileName, sampleQrData, function (err) {
-    t.ok(err,
-      'Should fail if error occurs during save')
+  await new Promise((resolve, reject) => {
+    SvgRenderer.renderToFile(fileName, sampleQrData, {
+      margin: 10,
+      scale: 1
+    }, (err) => {
+      try {
+        assert.ok(!err,
+          'Should not generate errors with options param')
+        assert.strictEqual(writeCalls[1], fileName,
+          'Should save file with correct file name')
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    })
   })
 
-  fsStub.restore()
+  fsStub.mock.restore()
+  fsStub = mock.method(fs, 'writeFile', (file, data, cb) => {
+    cb(new Error())
+  })
+
+  await new Promise((resolve, reject) => {
+    SvgRenderer.renderToFile(fileName, sampleQrData, (err) => {
+      try {
+        assert.ok(err,
+          'Should fail if error occurs during save')
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    })
+  })
+
+  fsStub.mock.restore()
 })

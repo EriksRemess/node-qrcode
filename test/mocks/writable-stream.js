@@ -1,30 +1,27 @@
-const stream = require('stream')
-const util = require('util')
+import stream from 'node:stream'
 
-function WritableStream () {
-  stream.Writable.call(this)
-  this.forceError = false
+export default class WritableStream extends stream.Writable {
+  constructor () {
+    super()
+    this.forceError = false
 
-  this.once('finish', function () {
-    this.close()
-  })
+    this.once('finish', () => {
+      this.close()
+    })
+  }
+
+  _write (data, encoding, cb) {
+    if (this.forceError) this.emit('error', new Error('Fake error'))
+    cb(this.forceError || null)
+  }
+
+  close (cb) {
+    this.emit('close')
+    if (cb) cb()
+  }
+
+  forceErrorOnWrite () {
+    this.forceError = true
+    return this
+  }
 }
-
-util.inherits(WritableStream, stream.Writable)
-
-WritableStream.prototype._write = function (data, encoding, cb) {
-  if (this.forceError) this.emit('error', new Error('Fake error'))
-  cb(this.forceError || null)
-}
-
-WritableStream.prototype.close = function (cb) {
-  this.emit('close')
-  if (cb) cb()
-}
-
-WritableStream.prototype.forceErrorOnWrite = function () {
-  this.forceError = true
-  return this
-}
-
-module.exports = WritableStream

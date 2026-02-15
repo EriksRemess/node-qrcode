@@ -1,9 +1,5 @@
-const QRCode = require('../lib')
+import QRCode from '#lib/index'
 
-QRCode.toString('yo yo yo', function (error, data) {
-  if (error) {
-    throw new Error(error)
-  }
+const data = await QRCode.toString('yo yo yo')
 
-  console.log(data)
-})
+console.log(data)

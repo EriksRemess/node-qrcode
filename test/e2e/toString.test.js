@@ -1,151 +1,44 @@
-const test = require('tap').test
-const fs = require('fs')
-const path = require('path')
-const QRCode = require('lib')
-const browser = require('lib/browser')
-const Helpers = require('test/helpers')
+import { test } from 'node:test'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import QRCode from '#lib/index'
 
-test('toString - no promise available', function (t) {
-  Helpers.removeNativePromise()
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-  t.throw(function () { QRCode.toString() },
-    'Should throw if text is not provided')
+test('toString', async (t) => {
+  await t.assert.rejects(() => QRCode.toString(), 'Should reject if text is not provided')
 
-  t.throw(function () { QRCode.toString('some text') },
-    'Should throw if a callback is not provided')
+  const str = await QRCode.toString('some text')
+  t.assert.strictEqual(typeof str, 'string', 'Should return a string')
 
-  t.throw(function () { QRCode.toString('some text', {}) },
-    'Should throw if a callback is not a function')
-
-  t.throw(function () { QRCode.toString() },
-    'Should throw if text is not provided (browser)')
-
-  t.throw(function () { browser.toString('some text') },
-    'Should throw if a callback is not provided (browser)')
-
-  t.throw(function () { browser.toString('some text', {}) },
-    'Should throw if a callback is not a function (browser)')
-
-  t.end()
-
-  Helpers.restoreNativePromise()
+  const strWithOptions = await QRCode.toString('some text', { errorCorrectionLevel: 'L' })
+  t.assert.strictEqual(typeof strWithOptions, 'string', 'Should return a string with options')
+  t.assert.strictEqual(typeof QRCode.toString('some text').then, 'function', 'Should return a promise')
 })
 
-test('toString', function (t) {
-  t.plan(5)
-
-  t.throw(function () { QRCode.toString() },
-    'Should throw if text is not provided')
-
-  QRCode.toString('some text', function (err, str) {
-    t.ok(!err, 'There should be no error')
-    t.equals(typeof str, 'string',
-      'Should return a string')
-  })
-
-  t.equals(typeof QRCode.toString('some text').then, 'function',
-    'Should return a promise')
-
-  QRCode.toString('some text', { errorCorrectionLevel: 'L' })
-    .then(function (str) {
-      t.equals(typeof str, 'string',
-        'Should return a string')
-    })
-})
-
-test('toString (browser)', function (t) {
-  t.plan(5)
-
-  t.throw(function () { browser.toString() },
-    'Should throw if text is not provided')
-
-  browser.toString('some text', function (err, str) {
-    t.ok(!err, 'There should be no error (browser)')
-    t.equals(typeof str, 'string',
-      'Should return a string (browser)')
-  })
-
-  t.equals(typeof browser.toString('some text').then, 'function',
-    'Should return a promise')
-
-  browser.toString('some text', { errorCorrectionLevel: 'L' })
-    .then(function (str) {
-      t.equals(typeof str, 'string',
-        'Should return a string')
-    })
-})
-
-test('toString svg', function (t) {
+test('toString svg', async (t) => {
   const file = path.join(__dirname, '/svgtag.expected.out')
-  t.plan(6)
+  const expectedSvg = await fs.promises.readFile(file, 'utf8')
 
-  QRCode.toString('http://www.google.com', {
-    version: 1, // force version=1 to trigger an error
+  await QRCode.toString('http://www.google.com', {
+    version: 1,
     errorCorrectionLevel: 'H',
     type: 'svg'
-  }, function (err, code) {
-    t.ok(err, 'there should be an error ')
-    t.notOk(code, 'string should be null')
-  })
+  }).then(
+    () => t.assert.fail('Expected version error'),
+    (err) => t.assert.ok(err, 'there should be an error')
+  )
 
-  fs.readFile(file, 'utf8', function (err, expectedSvg) {
-    if (err) throw err
-
-    QRCode.toString('http://www.google.com', {
-      errorCorrectionLevel: 'H',
-      type: 'svg'
-    }, function (err, code) {
-      t.ok(!err, 'There should be no error')
-      t.equal(code, expectedSvg, 'should output a valid svg')
-    })
-  })
-
-  QRCode.toString('http://www.google.com', {
-    version: 1, // force version=1 to trigger an error
+  const svg = await QRCode.toString('http://www.google.com', {
     errorCorrectionLevel: 'H',
     type: 'svg'
-  }).catch(function (err) {
-    t.ok(err, 'there should be an error (promise)')
   })
-
-  fs.readFile(file, 'utf8', function (err, expectedSvg) {
-    if (err) throw err
-
-    QRCode.toString('http://www.google.com', {
-      errorCorrectionLevel: 'H',
-      type: 'svg'
-    }).then(function (code) {
-      t.equal(code, expectedSvg, 'should output a valid svg (promise)')
-    })
-  })
+  t.assert.strictEqual(svg, expectedSvg, 'should output a valid svg')
 })
 
-test('toString browser svg', function (t) {
-  const file = path.join(__dirname, '/svgtag.expected.out')
-
-  t.plan(3)
-
-  fs.readFile(file, 'utf8', function (err, expectedSvg) {
-    if (err) throw err
-
-    browser.toString('http://www.google.com', {
-      errorCorrectionLevel: 'H',
-      type: 'svg'
-    }, function (err, code) {
-      t.ok(!err, 'There should be no error')
-      t.equal(code, expectedSvg, 'should output a valid svg')
-    })
-
-    browser.toString('http://www.google.com', {
-      errorCorrectionLevel: 'H',
-      type: 'svg'
-    }).then(function (code) {
-      t.equal(code, expectedSvg, 'should output a valid svg (promise)')
-    })
-  })
-})
-
-test('toString utf8', function (t) {
+test('toString utf8', async (t) => {
   const expectedUtf8 = [
     '                                 ',
     '                                 ',
@@ -163,76 +56,29 @@ test('toString utf8', function (t) {
     '    █ ▀▀▀ █  █▀ ▀ █ ▀▀▄██ ███    ',
     '    ▀▀▀▀▀▀▀ ▀▀▀  ▀▀ ▀    ▀  ▀    ',
     '                                 ',
-    '                                 '].join('\n')
+    '                                 '
+  ].join('\n')
 
-  t.plan(9)
-
-  QRCode.toString('http://www.google.com', {
-    version: 1, // force version=1 to trigger an error
+  await QRCode.toString('http://www.google.com', {
+    version: 1,
     errorCorrectionLevel: 'H',
     type: 'utf8'
-  }, function (err, code) {
-    t.ok(err, 'there should be an error ')
-    t.notOk(code, 'string should be null')
-  })
+  }).then(
+    () => t.assert.fail('Expected version error'),
+    (err) => t.assert.ok(err, 'there should be an error')
+  )
 
-  QRCode.toString('http://www.google.com', {
+  const utf8 = await QRCode.toString('http://www.google.com', {
     errorCorrectionLevel: 'M',
     type: 'utf8'
-  }, function (err, code) {
-    t.ok(!err, 'There should be no error')
-    t.equal(code, expectedUtf8, 'should output a valid symbol')
   })
+  t.assert.strictEqual(utf8, expectedUtf8, 'should output a valid symbol')
 
-  QRCode.toString('http://www.google.com', function (err, code) {
-    t.ok(!err, 'There should be no error')
-    t.equal(code, expectedUtf8,
-      'Should output a valid symbol with default options')
-  })
-
-  QRCode.toString('http://www.google.com', {
-    version: 1, // force version=1 to trigger an error
-    errorCorrectionLevel: 'H',
-    type: 'utf8'
-  }).catch(function (err) {
-    t.ok(err, 'there should be an error (promise)')
-  })
-
-  QRCode.toString('http://www.google.com', {
-    errorCorrectionLevel: 'M',
-    type: 'utf8'
-  }).then(function (code) {
-    t.equal(code, expectedUtf8, 'should output a valid symbol (promise)')
-  })
-
-  QRCode.toString('http://www.google.com').then(function (code) {
-    t.equal(code, expectedUtf8,
-      'Should output a valid symbol with default options (promise)')
-  })
+  const utf8Default = await QRCode.toString('http://www.google.com')
+  t.assert.strictEqual(utf8Default, expectedUtf8, 'Should output a valid symbol with default options')
 })
 
-test('toString terminal', function (t) {
-  const expectedTerminal = fs.readFileSync(path.join(__dirname, '/terminal.expected.out')) + ''
-
-  t.plan(3)
-
-  QRCode.toString('http://www.google.com', {
-    errorCorrectionLevel: 'M',
-    type: 'terminal'
-  }, function (err, code) {
-    t.ok(!err, 'There should be no error')
-    t.equal(code + '\n', expectedTerminal, 'should output a valid symbol')
-  })
-
-  QRCode.toString('http://www.google.com', {
-    errorCorrectionLevel: 'M',
-    type: 'terminal'
-  }).then(function (code) {
-    t.equal(code + '\n', expectedTerminal, 'should output a valid symbol (promise)')
-  })
-})
-
-test('toString byte-input', function (t) {
+test('toString byte-input', async (t) => {
   const expectedOutput = [
     '                             ',
     '                             ',
@@ -252,10 +98,6 @@ test('toString byte-input', function (t) {
   ].join('\n')
   const byteInput = new Uint8ClampedArray([1, 2, 3, 4, 5])
 
-  t.plan(2)
-
-  QRCode.toString([{ data: byteInput, mode: 'byte' }], { errorCorrectionLevel: 'L' }, (err, code) => {
-    t.ok(!err, 'there should be no error')
-    t.equal(code, expectedOutput, 'should output the correct code')
-  })
+  const code = await QRCode.toString([{ data: byteInput, mode: 'byte' }], { errorCorrectionLevel: 'L' })
+  t.assert.strictEqual(code, expectedOutput, 'should output the correct code')
 })

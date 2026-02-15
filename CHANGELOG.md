@@ -1,3 +1,11 @@
+## [Unreleased]
+
+### ⚠ BREAKING CHANGES
+
+* Removed callback compatibility from public APIs. `toDataURL`, `toString`, `toFile`, and `toFileStream` are Promise-based.
+* Removed browser and terminal runtime surfaces; package now targets Node.js usage only.
+* Raised minimum supported Node.js runtime to modern Node (24+ in this codebase).
+
 ## [1.3.3](https://github.com/soldair/node-qrcode/compare/v1.3.2...v1.3.3) (2019-01-16)
 
 fixing security vulnerabillities reported by users of snyk and `npm audit` major

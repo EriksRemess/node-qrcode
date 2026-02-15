@@ -1,7 +1,7 @@
-const QRCode = require('../lib')
-const http = require('http')
+import http from 'node:http'
+import QRCode from '#lib/index'
 
-function testQRCode (req, res) {
+async function testQRCode (req, res) {
   res.writeHead(200, { 'Content-Type': 'text/html' })
 
   const jungleBook = "The moonlight was blocked out of the mouth of the cave, for Shere Khan's\n" +
@@ -24,11 +24,13 @@ function testQRCode (req, res) {
   "the Head of the Pack, and not from any striped cattle-killer. The man's\n" +
   'cub is ours--to kill if we choose."'
 
-  // QRCode.QRCodeDraw.color.dark = '#d4d4d4';
-  QRCode.toDataURL(jungleBook, function (err, url) {
-    if (err) console.log('error: ' + err)
-    res.end("<!DOCTYPE html/><html><head><title>node-qrcode</title></head><body><img src='" + url + "'/></body></html>")
-  })
+  try {
+    const url = await QRCode.toDataURL(jungleBook)
+    res.end(`<!DOCTYPE html/><html><head><title>node-qrcode</title></head><body><img src='${url}'/></body></html>`)
+  } catch (error) {
+    res.statusCode = 500
+    res.end(error.message)
+  }
 }
 
 http.createServer(testQRCode).listen(3030)

@@ -1,8 +1,8 @@
-const test = require('tap').test
-const BitBuffer = require('core/bit-buffer')
-const NumericData = require('core/numeric-data')
-const Mode = require('core/mode')
-
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import BitBuffer from '#lib/core/bit-buffer'
+import NumericData from '#lib/core/numeric-data'
+import Mode from '#lib/core/mode'
 const testData = [
   {
     data: 8,
@@ -37,18 +37,16 @@ const testData = [
   }
 ]
 
-test('Numeric Data', function (t) {
-  testData.forEach(function (data) {
+test('Numeric Data', (t) => {
+  testData.forEach((data) => {
     const numericData = new NumericData(data.data)
 
-    t.equal(numericData.mode, Mode.NUMERIC, 'Mode should be NUMERIC')
-    t.equal(numericData.getLength(), data.length, 'Should return correct length')
-    t.equal(numericData.getBitsLength(), data.bitLength, 'Should return correct bit length')
+    assert.strictEqual(numericData.mode, Mode.NUMERIC, 'Mode should be NUMERIC')
+    assert.strictEqual(numericData.getLength(), data.length, 'Should return correct length')
+    assert.strictEqual(numericData.getBitsLength(), data.bitLength, 'Should return correct bit length')
 
     const bitBuffer = new BitBuffer()
     numericData.write(bitBuffer)
-    t.deepEqual(bitBuffer.buffer, data.dataBit, 'Should write correct data to buffer')
+    assert.deepStrictEqual(bitBuffer.buffer, data.dataBit, 'Should write correct data to buffer')
   })
-
-  t.end()
 })
