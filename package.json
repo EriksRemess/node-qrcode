@@ -43,11 +43,11 @@
     "bench:hotspots": "node examples/bench-hotspots.js"
   },
   "dependencies": {
-    "pngjs": "^7.0.0"
+    "pngjs": "github:EriksRemess/pngjs"
   },
   "devDependencies": {
     "canvas": "^3.2.1",
-    "eslint": "^10.0.0",
+    "eslint": "^10.0.2",
     "globals": "^17.3.0",
     "htmlparser2": "^10.1.0",
     "jsqr": "^1.4.0"
