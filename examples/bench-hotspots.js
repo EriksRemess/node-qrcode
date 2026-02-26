@@ -91,8 +91,7 @@ async function runCase (label, text, iterations, warmupIterations) {
   for (let i = 0; i < iterations; i++) {
     const dataUrl = await QRCode.toDataURL(text, {
       errorCorrectionLevel: 'M',
-      type: 'image/png',
-      rendererOpts: useFastPng ? { fastPng: true } : undefined
+      type: 'image/png'
     })
     toDataUrlChecksum += dataUrl.length
   }
@@ -107,12 +106,9 @@ async function runCase (label, text, iterations, warmupIterations) {
   }
 }
 
-let useFastPng = false
-
 export async function runBenchmark (cliArgs = getCliArgs()) {
   const iterations = parseIntArg(cliArgs, 'iterations', 100)
   const warmupIterations = parseIntArg(cliArgs, 'warmup', 20)
-  useFastPng = parseIntArg(cliArgs, 'fast-png', 0) === 1
 
   const payloads = [
     { label: 'small (32B)', text: generatePayload(32) },
@@ -123,7 +119,6 @@ export async function runBenchmark (cliArgs = getCliArgs()) {
   console.log('Hotspot benchmark (ranked)')
   console.log(`Runtime ${getRuntimeLabel()}`)
   console.log(`iterations=${iterations} warmup=${warmupIterations}`)
-  console.log(`fastPng=${useFastPng ? 'on' : 'off'}`)
 
   for (const payload of payloads) {
     await runCase(payload.label, payload.text, iterations, warmupIterations)
