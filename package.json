@@ -43,7 +43,7 @@
     "bench:hotspots": "node examples/bench-hotspots.js"
   },
   "dependencies": {
-    "pngjs": "github:EriksRemess/pngjs"
+    "pngjs": "github:EriksRemess/pngjs#23dd7af9554f8f4aa123cc621eb92432671fd099"
   },
   "devDependencies": {
     "canvas": "^3.2.1",
