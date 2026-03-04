@@ -1,5 +1,6 @@
 import { runBenchmark as runSvgBenchmark } from '#examples/bench-svg-tostring'
 import { runBenchmark as runImageDataBenchmark } from '#examples/bench-image-data'
+import { runBenchmark as runPngBenchmark } from '#examples/bench-png-buffer'
 import { getCliArgs, isMainModule } from '#examples/bench-runtime'
 
 async function main () {
@@ -7,6 +8,9 @@ async function main () {
 
   console.log('\n=== SVG toString ===')
   await runSvgBenchmark(args)
+
+  console.log('\n=== PNG toBuffer ===')
+  await runPngBenchmark(args)
 
   console.log('\n=== qrToImageData ===')
   runImageDataBenchmark(args)

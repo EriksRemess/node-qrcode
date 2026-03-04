@@ -38,12 +38,10 @@
     "pretest": "npm run lint",
     "test": "node --throw-deprecation test.js",
     "bench:svg-string": "node examples/bench-svg-tostring.js",
+    "bench:png": "node examples/bench-png-buffer.js",
     "bench:image-data": "node examples/bench-image-data.js",
     "bench:all": "node examples/bench-all.js",
     "bench:hotspots": "node examples/bench-hotspots.js"
-  },
-  "dependencies": {
-    "pngjs": "github:EriksRemess/pngjs#23dd7af9554f8f4aa123cc621eb92432671fd099"
   },
   "devDependencies": {
     "canvas": "^3.2.1",
@@ -58,5 +56,8 @@
   },
   "engines": {
     "node": ">=24.0.0"
+  },
+  "dependencies": {
+    "pngjs": "github:EriksRemess/pngjs#5c216256fc7ddb72149d65101cfcc1086bcbb0c2"
   }
 }
