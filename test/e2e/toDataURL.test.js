@@ -59,3 +59,17 @@ test('toDataURL - decoded text matches input', async (t) => {
   t.assert.ok(decoded, 'QR should be decodable')
   t.assert.strictEqual(decoded.data, input, 'Decoded text should match input text')
 })
+
+test('toDataURL - rounded PNG decodes to input', async (t) => {
+  const input = 'rounded-png-roundtrip'
+  const dataUrl = await QRCode.toDataURL(input, {
+    errorCorrectionLevel: 'H',
+    type: 'image/png',
+    shape: 'rounded'
+  })
+
+  const { decoded } = decodePngDataUrl(dataUrl)
+
+  t.assert.ok(decoded, 'Rounded PNG should be decodable')
+  t.assert.strictEqual(decoded.data, input, 'Decoded text should match input text')
+})

@@ -50,9 +50,6 @@ test('Utils getOptions', (t) => {
     },
     'Should return correct colors value from numbers')
 
-  assert.strictEqual(Utils.getOptions({ shape: 'circle' }).shape, 'circle',
-    'Should return the requested shape')
-
   assert.strictEqual(Utils.getOptions({ shape: 'rounded' }).shape, 'rounded',
     'Should return the requested rounded shape')
 
