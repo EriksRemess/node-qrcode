@@ -10,6 +10,7 @@ test('Utils getOptions', (t) => {
       dark: { r: 0, g: 0, b: 0, a: 255, hex: '#000000' },
       light: { r: 255, g: 255, b: 255, a: 255, hex: '#ffffff' }
     },
+    shape: 'square',
     type: undefined,
     rendererOpts: {}
   }
@@ -49,11 +50,17 @@ test('Utils getOptions', (t) => {
     },
     'Should return correct colors value from numbers')
 
+  assert.strictEqual(Utils.getOptions({ shape: 'circle' }).shape, 'circle',
+    'Should return the requested shape')
+
   assert.throws(() => { Utils.getOptions({ color: { dark: true } }) },
     'Should throw if color is not a string')
 
   assert.throws(() => { Utils.getOptions({ color: { dark: '#aa' } }) },
     'Should throw if color is not in a valid hex format')
+
+  assert.throws(() => { Utils.getOptions({ shape: 'triangle' }) },
+    'Should throw if shape is invalid')
 })
 
 test('Utils getScale', (t) => {

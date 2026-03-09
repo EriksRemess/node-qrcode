@@ -135,6 +135,22 @@ test('Svg render', (t) => {
   return Promise.all(tests)
 })
 
+test('Svg render with circle modules', () => {
+  const data = QRCode.create('sample text', { version: 2 })
+  const svg = SvgRenderer.render(data, {
+    shape: 'circle',
+    color: {
+      dark: '#00000080'
+    }
+  })
+
+  assert.match(svg, /<svg[^>]*viewBox="0 0 33 33"/, 'Should include the expected viewBox')
+  assert.match(svg, /<path fill="#ffffff"/, 'Should include a background path')
+  assert.match(svg, /<g fill="#000000" fill-opacity="\.50">/, 'Should render circle modules with fill color')
+  assert.match(svg, /<circle cx="4\.5" cy="4\.5" r="0\.55"\/>/, 'Should render circles for dark modules')
+  assert.doesNotMatch(svg, /shape-rendering="crispEdges"/, 'Should not force crisp edges for circles')
+})
+
 test('Svg renderToFile', async () => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   const fileName = 'qrimage.svg'
