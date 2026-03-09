@@ -162,8 +162,9 @@ test('Svg render with rounded modules', () => {
 
   assert.match(svg, /<svg[^>]*viewBox="0 0 33 33"/, 'Should include the expected viewBox')
   assert.match(svg, /<path fill="#ffffff"/, 'Should include a background path')
-  assert.match(svg, /<g fill="#000000" fill-opacity="\.50">/, 'Should render rounded modules with fill color')
-  assert.match(svg, /<rect x="4\.02" y="4\.02" width="0\.96" height="0\.96" rx="0\.14" ry="0\.14"\/>/, 'Should render rounded rects for dark modules')
+  assert.match(svg, /<path fill="#000000" fill-opacity="\.50" d="/, 'Should render rounded modules with fill color')
+  assert.match(svg, /M4\.14 4H5V5H4V4\.14A0\.14 0\.14 0 0 1 4\.14 4Z/, 'Should round exposed corners on the outer boundary')
+  assert.match(svg, /M5 4H6V5H5V4Z/, 'Should keep connected module seams square')
   assert.doesNotMatch(svg, /shape-rendering="crispEdges"/, 'Should not force crisp edges for rounded modules')
 })
 

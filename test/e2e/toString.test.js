@@ -134,13 +134,17 @@ test('toString svg rounded decodes to input', async (t) => {
     margin: 4
   })
 
-  t.assert.match(rawSvg, /<rect\b/, 'SVG should include rect elements')
+  t.assert.match(rawSvg, /<path[^>]*fill="[^"]+"[^>]*d="[^"]*A0\.14 0\.14 0 0 1/, 'SVG should include rounded path commands')
 
   const viewBoxMatch = rawSvg.match(/viewBox="0 0 (\d+) (\d+)"/)
   t.assert.ok(viewBoxMatch, 'SVG should include a viewBox')
 
   const width = Number.parseInt(viewBoxMatch[1], 10)
   const height = Number.parseInt(viewBoxMatch[2], 10)
+  const qrData = QRCode.create(input, { errorCorrectionLevel: 'H' })
+  const qrSize = qrData.modules.size
+  const margin = (width - qrSize) / 2
+  const radius = 0.14
   const scale = 12
   const rasterWidth = width * scale
   const rasterHeight = height * scale
@@ -162,50 +166,73 @@ test('toString svg rounded decodes to input', async (t) => {
     pixels[offset + 3] = 255
   }
 
-  const rectRegex = /<rect[^>]*x="([^"]+)"[^>]*y="([^"]+)"[^>]*width="([^"]+)"[^>]*height="([^"]+)"[^>]*rx="([^"]+)"[^>]*ry="([^"]+)"\/>/g
-  let rectCount = 0
-  let match
+  const isInsideRoundedModule = (localX, localY, tl, tr, br, bl) => {
+    if (tl > 0 && localX < tl && localY < tl) {
+      const dx = localX - tl
+      const dy = localY - tl
+      return dx * dx + dy * dy <= tl * tl
+    }
 
-  while ((match = rectRegex.exec(rawSvg)) !== null) {
-    rectCount++
+    if (tr > 0 && localX > 1 - tr && localY < tr) {
+      const dx = localX - (1 - tr)
+      const dy = localY - tr
+      return dx * dx + dy * dy <= tr * tr
+    }
 
-    const x = Number.parseFloat(match[1])
-    const y = Number.parseFloat(match[2])
-    const rectWidth = Number.parseFloat(match[3])
-    const rectHeight = Number.parseFloat(match[4])
-    const rx = Number.parseFloat(match[5])
-    const ry = Number.parseFloat(match[6])
-    const minX = Math.max(0, Math.floor(x * scale))
-    const maxX = Math.min(rasterWidth, Math.ceil((x + rectWidth) * scale))
-    const minY = Math.max(0, Math.floor(y * scale))
-    const maxY = Math.min(rasterHeight, Math.ceil((y + rectHeight) * scale))
+    if (br > 0 && localX > 1 - br && localY > 1 - br) {
+      const dx = localX - (1 - br)
+      const dy = localY - (1 - br)
+      return dx * dx + dy * dy <= br * br
+    }
 
-    for (let yy = minY; yy < maxY; yy++) {
-      const svgY = (yy + 0.5) / scale
+    if (bl > 0 && localX < bl && localY > 1 - bl) {
+      const dx = localX - bl
+      const dy = localY - (1 - bl)
+      return dx * dx + dy * dy <= bl * bl
+    }
 
-      for (let xx = minX; xx < maxX; xx++) {
-        const svgX = (xx + 0.5) / scale
+    return true
+  }
 
-        const insideCoreX = svgX >= x + rx && svgX <= x + rectWidth - rx
-        const insideCoreY = svgY >= y + ry && svgY <= y + rectHeight - ry
-        if (insideCoreX || insideCoreY) {
-          setPixel(xx, yy, 0)
-          continue
-        }
+  let roundedCount = 0
 
-        const cornerCx = svgX < x + rx ? x + rx : x + rectWidth - rx
-        const cornerCy = svgY < y + ry ? y + ry : y + rectHeight - ry
-        const dx = svgX - cornerCx
-        const dy = svgY - cornerCy
+  for (let row = 0; row < qrSize; row++) {
+    const rowOffset = row * qrSize
 
-        if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
-          setPixel(xx, yy, 0)
+    for (let col = 0; col < qrSize; col++) {
+      if (!qrData.modules.data[rowOffset + col]) continue
+      roundedCount++
+
+      const x = margin + col
+      const y = margin + row
+      const top = row > 0 && qrData.modules.data[rowOffset - qrSize + col]
+      const right = col < qrSize - 1 && qrData.modules.data[rowOffset + col + 1]
+      const bottom = row < qrSize - 1 && qrData.modules.data[rowOffset + qrSize + col]
+      const left = col > 0 && qrData.modules.data[rowOffset + col - 1]
+      const tl = !top && !left ? radius : 0
+      const tr = !top && !right ? radius : 0
+      const br = !bottom && !right ? radius : 0
+      const bl = !bottom && !left ? radius : 0
+      const minX = Math.max(0, Math.floor(x * scale))
+      const maxX = Math.min(rasterWidth, Math.ceil((x + 1) * scale))
+      const minY = Math.max(0, Math.floor(y * scale))
+      const maxY = Math.min(rasterHeight, Math.ceil((y + 1) * scale))
+
+      for (let yy = minY; yy < maxY; yy++) {
+        const localY = (yy + 0.5) / scale - y
+
+        for (let xx = minX; xx < maxX; xx++) {
+          const localX = (xx + 0.5) / scale - x
+
+          if (isInsideRoundedModule(localX, localY, tl, tr, br, bl)) {
+            setPixel(xx, yy, 0)
+          }
         }
       }
     }
   }
 
-  t.assert.ok(rectCount > 0, 'SVG should render at least one rounded rect')
+  t.assert.ok(roundedCount > 0, 'SVG should render at least one rounded module')
 
   const decoded = jsQR(pixels, rasterWidth, rasterHeight, {
     inversionAttempts: 'dontInvert'
