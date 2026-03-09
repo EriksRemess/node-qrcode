@@ -151,6 +151,22 @@ test('Svg render with circle modules', () => {
   assert.doesNotMatch(svg, /shape-rendering="crispEdges"/, 'Should not force crisp edges for circles')
 })
 
+test('Svg render with rounded modules', () => {
+  const data = QRCode.create('sample text', { version: 2 })
+  const svg = SvgRenderer.render(data, {
+    shape: 'rounded',
+    color: {
+      dark: '#00000080'
+    }
+  })
+
+  assert.match(svg, /<svg[^>]*viewBox="0 0 33 33"/, 'Should include the expected viewBox')
+  assert.match(svg, /<path fill="#ffffff"/, 'Should include a background path')
+  assert.match(svg, /<g fill="#000000" fill-opacity="\.50">/, 'Should render rounded modules with fill color')
+  assert.match(svg, /<rect x="4\.02" y="4\.02" width="0\.96" height="0\.96" rx="0\.14" ry="0\.14"\/>/, 'Should render rounded rects for dark modules')
+  assert.doesNotMatch(svg, /shape-rendering="crispEdges"/, 'Should not force crisp edges for rounded modules')
+})
+
 test('Svg renderToFile', async () => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   const fileName = 'qrimage.svg'

@@ -71,7 +71,7 @@ Common options include:
 - `margin`: quiet-zone size
 - `width` / `scale`
 - `color.dark` / `color.light` (RGBA hex)
-- `shape`: `square` or `circle` for SVG output (default `square`)
+- `shape`: `square`, `rounded`, or `circle` for SVG output (default `square`)
 - `type`: renderer output type
 
 ## Binary data

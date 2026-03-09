@@ -125,6 +125,96 @@ test('toString svg circle decodes to input', async (t) => {
   t.assert.strictEqual(decoded.data, input, 'Decoded text should match encoded input')
 })
 
+test('toString svg rounded decodes to input', async (t) => {
+  const input = 'svg-rounded-roundtrip'
+  const rawSvg = await QRCode.toString(input, {
+    errorCorrectionLevel: 'H',
+    type: 'svg',
+    shape: 'rounded',
+    margin: 4
+  })
+
+  t.assert.match(rawSvg, /<rect\b/, 'SVG should include rect elements')
+
+  const viewBoxMatch = rawSvg.match(/viewBox="0 0 (\d+) (\d+)"/)
+  t.assert.ok(viewBoxMatch, 'SVG should include a viewBox')
+
+  const width = Number.parseInt(viewBoxMatch[1], 10)
+  const height = Number.parseInt(viewBoxMatch[2], 10)
+  const scale = 12
+  const rasterWidth = width * scale
+  const rasterHeight = height * scale
+  const pixels = new Uint8ClampedArray(rasterWidth * rasterHeight * 4)
+
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = 255
+    pixels[i + 1] = 255
+    pixels[i + 2] = 255
+    pixels[i + 3] = 255
+  }
+
+  const setPixel = (x, y, color) => {
+    if (x < 0 || y < 0 || x >= rasterWidth || y >= rasterHeight) return
+    const offset = (y * rasterWidth + x) * 4
+    pixels[offset] = color
+    pixels[offset + 1] = color
+    pixels[offset + 2] = color
+    pixels[offset + 3] = 255
+  }
+
+  const rectRegex = /<rect[^>]*x="([^"]+)"[^>]*y="([^"]+)"[^>]*width="([^"]+)"[^>]*height="([^"]+)"[^>]*rx="([^"]+)"[^>]*ry="([^"]+)"\/>/g
+  let rectCount = 0
+  let match
+
+  while ((match = rectRegex.exec(rawSvg)) !== null) {
+    rectCount++
+
+    const x = Number.parseFloat(match[1])
+    const y = Number.parseFloat(match[2])
+    const rectWidth = Number.parseFloat(match[3])
+    const rectHeight = Number.parseFloat(match[4])
+    const rx = Number.parseFloat(match[5])
+    const ry = Number.parseFloat(match[6])
+    const minX = Math.max(0, Math.floor(x * scale))
+    const maxX = Math.min(rasterWidth, Math.ceil((x + rectWidth) * scale))
+    const minY = Math.max(0, Math.floor(y * scale))
+    const maxY = Math.min(rasterHeight, Math.ceil((y + rectHeight) * scale))
+
+    for (let yy = minY; yy < maxY; yy++) {
+      const svgY = (yy + 0.5) / scale
+
+      for (let xx = minX; xx < maxX; xx++) {
+        const svgX = (xx + 0.5) / scale
+
+        const insideCoreX = svgX >= x + rx && svgX <= x + rectWidth - rx
+        const insideCoreY = svgY >= y + ry && svgY <= y + rectHeight - ry
+        if (insideCoreX || insideCoreY) {
+          setPixel(xx, yy, 0)
+          continue
+        }
+
+        const cornerCx = svgX < x + rx ? x + rx : x + rectWidth - rx
+        const cornerCy = svgY < y + ry ? y + ry : y + rectHeight - ry
+        const dx = svgX - cornerCx
+        const dy = svgY - cornerCy
+
+        if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) <= 1) {
+          setPixel(xx, yy, 0)
+        }
+      }
+    }
+  }
+
+  t.assert.ok(rectCount > 0, 'SVG should render at least one rounded rect')
+
+  const decoded = jsQR(pixels, rasterWidth, rasterHeight, {
+    inversionAttempts: 'dontInvert'
+  })
+
+  t.assert.ok(decoded, 'Rounded SVG should be decodable')
+  t.assert.strictEqual(decoded.data, input, 'Decoded text should match encoded input')
+})
+
 test('toString svg with centered image decodes to input', async (t) => {
   const input = 'svg-roundtrip-with-center-image'
   const rawSvg = await QRCode.toString(input, {

@@ -53,6 +53,9 @@ test('Utils getOptions', (t) => {
   assert.strictEqual(Utils.getOptions({ shape: 'circle' }).shape, 'circle',
     'Should return the requested shape')
 
+  assert.strictEqual(Utils.getOptions({ shape: 'rounded' }).shape, 'rounded',
+    'Should return the requested rounded shape')
+
   assert.throws(() => { Utils.getOptions({ color: { dark: true } }) },
     'Should throw if color is not a string')
 
