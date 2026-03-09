@@ -58,6 +58,6 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
-    "pngjs": "github:EriksRemess/pngjs#5c216256fc7ddb72149d65101cfcc1086bcbb0c2"
+    "pngjs": "github:eriksremess/pngjs"
   }
 }

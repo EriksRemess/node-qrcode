@@ -1,27 +1,26 @@
 import { test } from 'node:test'
 import jsQR from 'jsqr'
-import { PNG } from 'pngjs'
+import { PNGWasm as PNG } from 'pngjs'
 import QRCode from '#lib/index'
 
-test('toDataURL - image/png', async (t) => {
-  const expectedDataURL = [
-    'data:image/png;base64,',
-    'iVBORw0KGgoAAAANSUhEUgAAAHQAAAB0CAYAAABUmhYnAAAAAklEQVR4AewaftIAAAKzSU',
-    'RBVO3BQW7kQAwEwSxC//9y7h55akCQxvYQjIj/scYo1ijFGqVYoxRrlGKNUqxRijVKsUYp',
-    '1ijFGqVYoxRrlGKNUqxRijXKxUNJ+EkqdyShU+mS0Kl0SfhJKk8Ua5RijVKsUS5epvKmJD',
-    'yh8iaVNyXhTcUapVijFGuUiw9Lwh0qdyShU+mS0Kl0Kk8k4Q6VTyrWKMUapVijXHw5lROV',
-    'kyR0Kt+sWKMUa5RijXIxTBI6lS4JkxVrlGKNUqxRLj5M5Tcl4UTlCZW/pFijFGuUYo1y8b',
-    'Ik/KQkdCpdEjqVLgmdykkS/rJijVKsUYo1ysVDKt9M5UTlmxRrlGKNUqxRLh5Kwh0qXRJ+',
-    'UxLuULkjCZ3KJxVrlGKNUqxRLh5S6ZLQqXRJ6FS6JHQqXRKeSEKn0iWhUzlJwolKl4QTlS',
-    'eKNUqxRinWKBe/LAmdSpeETuUkCZ1Kl4QTlS4Jd6h0SehUuiS8qVijFGuUYo1y8WFJ6FS6',
-    'JJyofFISOpVOpUtCp3KicqLypmKNUqxRijXKxYep3JGEE5UuCZ3KHSp3qHRJ6FR+U7FGKd',
-    'YoxRol/scXS8ITKidJeEKlS8KJyhPFGqVYoxRrlIuHkvCTVE5U7kjCicpJEk6S8JOKNUqx',
-    'RinWKBcvU3lTEu5IwolKp/KEyh1J6FTeVKxRijVKsUa5+LAk3KHyJpWTJHQqdyShU/lNxR',
-    'qlWKMUa5SLL6fSJaFLwhNJeCIJP6lYoxRrlGKNcvHlknCicpKEE5UuCSdJOFHpktCpPFGs',
-    'UYo1SrFGufgwlZ+k0iWhU+lUnlDpktCpdEnoVN5UrFGKNUqxRrl4WRL+EpU7ktCpdCpdEj',
-    'qVO5LQqTxRrFGKNUqxRon/scYo1ijFGqVYoxRrlGKNUqxRijVKsUYp1ijFGqVYoxRrlGKN',
-    'UqxRijXKP0OHEepgrecVAAAAAElFTkSuQmCC'].join('')
+function decodePngDataUrl(dataUrl) {
+  const base64 = dataUrl.replace('data:image/png;base64,', '')
+  const pngBuffer = Buffer.from(base64, 'base64')
+  const png = PNG.sync.read(pngBuffer)
+  const imageData = new Uint8ClampedArray(
+    png.data.buffer,
+    png.data.byteOffset,
+    png.data.byteLength
+  )
 
+  const decoded = jsQR(imageData, png.width, png.height, {
+    inversionAttempts: 'dontInvert'
+  })
+
+  return { base64, decoded, png }
+}
+
+test('toDataURL - image/png', async (t) => {
   await t.assert.rejects(() => QRCode.toDataURL(),
     'Should reject if no arguments are provided')
 
@@ -29,8 +28,15 @@ test('toDataURL - image/png', async (t) => {
     errorCorrectionLevel: 'L',
     type: 'image/png'
   })
-  t.assert.strictEqual(promisedUrl, expectedDataURL,
-    'url should match expected value for error correction L (promise)')
+  t.assert.ok(promisedUrl.startsWith('data:image/png;base64,'),
+    'url should have the PNG data URL header')
+
+  const { base64, decoded } = decodePngDataUrl(promisedUrl)
+  t.assert.strictEqual(base64.length % 4, 0,
+    'base64 payload should be padded correctly')
+  t.assert.ok(decoded, 'QR should be decodable')
+  t.assert.strictEqual(decoded.data, 'i am a pony!',
+    'Decoded text should match input text')
 
   await QRCode.toDataURL('i am a pony!', {
     version: 1, // force version=1 to trigger an error
@@ -48,18 +54,7 @@ test('toDataURL - decoded text matches input', async (t) => {
     type: 'image/png'
   })
 
-  const base64 = dataUrl.replace('data:image/png;base64,', '')
-  const pngBuffer = Buffer.from(base64, 'base64')
-  const png = PNG.sync.read(pngBuffer)
-  const imageData = new Uint8ClampedArray(
-    png.data.buffer,
-    png.data.byteOffset,
-    png.data.byteLength
-  )
-
-  const decoded = jsQR(imageData, png.width, png.height, {
-    inversionAttempts: 'dontInvert'
-  })
+  const { decoded } = decodePngDataUrl(dataUrl)
 
   t.assert.ok(decoded, 'QR should be decodable')
   t.assert.strictEqual(decoded.data, input, 'Decoded text should match input text')
