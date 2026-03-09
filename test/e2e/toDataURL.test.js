@@ -73,3 +73,32 @@ test('toDataURL - rounded PNG decodes to input', async (t) => {
   t.assert.ok(decoded, 'Rounded PNG should be decodable')
   t.assert.strictEqual(decoded.data, input, 'Decoded text should match input text')
 })
+
+test('toDataURL - rounded PNG has antialiased corners', async (t) => {
+  const dataUrl = await QRCode.toDataURL('rounded-antialias-check', {
+    errorCorrectionLevel: 'H',
+    type: 'image/png',
+    shape: 'rounded',
+    color: {
+      dark: '#000000',
+      light: '#ffffff'
+    }
+  })
+
+  const { png } = decodePngDataUrl(dataUrl)
+  let hasBlendedPixel = false
+
+  for (let i = 0; i < png.data.length; i += 4) {
+    const r = png.data[i]
+    const g = png.data[i + 1]
+    const b = png.data[i + 2]
+    const a = png.data[i + 3]
+
+    if (a === 255 && r === g && g === b && r > 0 && r < 255) {
+      hasBlendedPixel = true
+      break
+    }
+  }
+
+  t.assert.ok(hasBlendedPixel, 'Rounded PNG should include blended edge pixels')
+})
