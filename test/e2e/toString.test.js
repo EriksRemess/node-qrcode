@@ -134,7 +134,7 @@ test('toString svg rounded decodes to input', async (t) => {
     margin: 4
   })
 
-  t.assert.match(rawSvg, /<path[^>]*fill="[^"]+"[^>]*d="[^"]*A0\.14 0\.14 0 0 1/, 'SVG should include rounded path commands')
+  t.assert.match(rawSvg, /<path[^>]*fill="[^"]+"[^>]*d="[^"]*A0\.2 0\.2 0 0 1/, 'SVG should include rounded path commands')
 
   const viewBoxMatch = rawSvg.match(/viewBox="0 0 (\d+) (\d+)"/)
   t.assert.ok(viewBoxMatch, 'SVG should include a viewBox')
@@ -144,7 +144,7 @@ test('toString svg rounded decodes to input', async (t) => {
   const qrData = QRCode.create(input, { errorCorrectionLevel: 'H' })
   const qrSize = qrData.modules.size
   const margin = (width - qrSize) / 2
-  const radius = 0.14
+  const radius = 0.2
   const scale = 12
   const rasterWidth = width * scale
   const rasterHeight = height * scale
