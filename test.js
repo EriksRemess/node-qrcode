@@ -7,14 +7,27 @@ const __dirname = path.dirname(__filename)
 
 const opt = {
   cwd: __dirname,
-  env: (function () {
-    process.env.NODE_PATH = './' + path.delimiter + './lib'
-    return process.env
-  }()),
+  env: {
+    ...process.env,
+    NODE_PATH: './' + path.delimiter + './lib'
+  },
   stdio: [process.stdin, process.stdout, process.stderr]
 }
 
-spawn('node', [
+const child = spawn('node', [
   '--test',
   process.argv[2] || 'test/**/*.test.js'
 ], opt)
+
+child.on('error', (err) => {
+  throw err
+})
+
+child.on('exit', (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal)
+    return
+  }
+
+  process.exitCode = code ?? 1
+})
