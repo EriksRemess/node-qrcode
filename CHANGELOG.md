@@ -1,7 +1,10 @@
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-31
+
 ### ⚠ BREAKING CHANGES
 
+* Renamed the package to `@eriksremess/qrcode` and moved publication to GitHub Packages.
 * Removed callback compatibility from public APIs. `toDataURL`, `toString`, `toFile`, and `toFileStream` are Promise-based.
 * Removed browser and terminal runtime surfaces; package now targets Node.js usage only.
 * Raised minimum supported Node.js runtime to Node.js 26.
@@ -100,5 +103,4 @@ no breaking changes. promoting to a stable semver
 
 
 ## 0.0.2 (2010-12-27)
-
 

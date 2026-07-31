@@ -1,7 +1,7 @@
 {
-  "name": "qrcode",
+  "name": "@eriksremess/qrcode",
   "description": "QRCode / 2d Barcode API for Node.js",
-  "version": "1.5.4",
+  "version": "2.0.0",
   "author": "Ēriks Remess <eriks@remess.lv>",
   "contributors": [
     "Ryan Day <soldair@gmail.com>",
@@ -53,6 +53,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/EriksRemess/node-qrcode.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "engines": {
     "node": ">=26.0.0"

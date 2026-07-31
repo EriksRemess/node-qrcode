@@ -1,4 +1,4 @@
-# node-qrcode
+# @eriksremess/qrcode
 
 Node.js QR code/2D barcode generator.
 
@@ -19,13 +19,13 @@ from GitHub Packages, so configure the scope and a classic GitHub token with
 ```
 
 ```sh
-npm install qrcode
+npm install @eriksremess/qrcode
 ```
 
 ## Usage
 
 ```js
-import QRCode from 'qrcode'
+import QRCode from '@eriksremess/qrcode'
 
 const url = await QRCode.toDataURL('I am a pony!')
 console.log(url)
@@ -34,7 +34,7 @@ console.log(url)
 ### Promise / async usage
 
 ```js
-import QRCode from 'qrcode'
+import QRCode from '@eriksremess/qrcode'
 
 async function generate (text) {
   return QRCode.toDataURL(text)
@@ -88,7 +88,7 @@ Common options include:
 For byte data, pass a `Uint8ClampedArray`, compatible array, or Node.js `Buffer`:
 
 ```js
-import QRCode from 'qrcode'
+import QRCode from '@eriksremess/qrcode'
 
 await QRCode.toFile(
   'foo.png',
@@ -101,8 +101,8 @@ await QRCode.toFile(
 To enable optimized Kanji mode, provide a `toSJISFunc` converter:
 
 ```js
-import QRCode from 'qrcode'
-import toSJIS from 'qrcode/helper/to-sjis.js'
+import QRCode from '@eriksremess/qrcode'
+import toSJIS from '@eriksremess/qrcode/helper/to-sjis'
 
 const url = await QRCode.toDataURL('漢字', { toSJISFunc: toSJIS })
 console.log(url)
