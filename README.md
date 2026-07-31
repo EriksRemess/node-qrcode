@@ -9,6 +9,15 @@ Node.js QR code/2D barcode generator.
 
 ## Installation
 
+Node.js 26 or newer is required. The PNG renderer uses `@eriksremess/pngjs`
+from GitHub Packages, so configure the scope and a classic GitHub token with
+`read:packages` before installing:
+
+```ini
+@eriksremess:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+```
+
 ```sh
 npm install qrcode
 ```

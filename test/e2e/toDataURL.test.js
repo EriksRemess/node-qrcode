@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import jsQR from 'jsqr'
-import { PNG } from 'pngjs/native'
+import { PNG } from '@eriksremess/pngjs/native'
 import QRCode from '#lib/index'
 
 function decodePngDataUrl(dataUrl) {

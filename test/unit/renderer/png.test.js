@@ -1,7 +1,7 @@
 import { test, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import { PNG } from 'pngjs/native'
+import { PNG } from '@eriksremess/pngjs/native'
 import QRCode from '#lib/core/qrcode'
 import PngRenderer from '#lib/renderer/png'
 import StreamMock from '#test/mocks/writable-stream'

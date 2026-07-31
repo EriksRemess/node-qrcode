@@ -31,7 +31,7 @@
     "lib",
     "helper"
   ],
-  "homepage": "http://github.com/EriksRemess/node-qrcode",
+  "homepage": "https://github.com/EriksRemess/node-qrcode",
   "license": "MIT",
   "scripts": {
     "lint": "eslint .",
@@ -52,13 +52,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/EriksRemess/node-qrcode.git"
+    "url": "https://github.com/EriksRemess/node-qrcode.git"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   },
   "dependencies": {
-    "pngjs": "github:eriksremess/pngjs"
+    "@eriksremess/pngjs": "^7.0.1"
   },
   "allowScripts": {
     "canvas@3.2.3": true
