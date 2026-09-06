@@ -15,7 +15,7 @@ test('toFileStream png', async (t) => {
 
   await QRCode.toFileStream(fstream, 'i am a pony!')
 
-  await QRCode.toFileStream(fstream, 'i am a pony!', {
+  await QRCode.toFileStream(new StreamMock(), 'i am a pony!', {
     type: 'image/png'
   })
 
@@ -25,20 +25,11 @@ test('toFileStream png', async (t) => {
   spy.mock.restore()
 })
 
-test('toFileStream png with write error', (t) => {
-  const fstreamErr = new StreamMock().forceErrorOnWrite()
-  return new Promise((resolve, reject) => {
-    fstreamErr.on('error', (e) => {
-      try {
-        t.assert.ok(e, 'Should return an error')
-        resolve()
-      } catch (error) {
-        reject(error)
-      }
-    })
-
-    QRCode.toFileStream(fstreamErr, 'i am a pony!')
-  })
+test('toFileStream png with write error', async (t) => {
+  await t.assert.rejects(
+    QRCode.toFileStream(new StreamMock().forceErrorOnWrite(), 'i am a pony!'),
+    /Fake error/
+  )
 })
 
 test('toFileStream png with qrcode error', async (t) => {

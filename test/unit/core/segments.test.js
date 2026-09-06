@@ -6,7 +6,6 @@ import NumericData from '#lib/core/numeric-data'
 import AlphanumericData from '#lib/core/alphanumeric-data'
 import ByteData from '#lib/core/byte-data'
 import toSJIS from '#helper/to-sjis'
-import Utils from '#lib/core/utils'
 let testData = [
   {
     input: '1A1',
@@ -198,9 +197,8 @@ test('Segments optimization', (t) => {
   assert.deepStrictEqual(Segments.fromString('乂ЁЖ', 1), Segments.fromArray([{ data: '乂ЁЖ', mode: 'byte' }]),
     'Should use Byte mode if Kanji support is disabled')
 
-  Utils.setToSJISFunction(toSJIS)
   testData.forEach((data) => {
-    assert.deepStrictEqual(Segments.fromString(data.input, 1), Segments.fromArray(data.result))
+    assert.deepStrictEqual(Segments.fromString(data.input, 1, toSJIS), Segments.fromArray(data.result, toSJIS))
   })
 })
 

@@ -1,9 +1,8 @@
 import { test, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
-import { PNG } from '@eriksremess/pngjs/native'
 import QRCode from '#lib/core/qrcode'
-import PngRenderer from '#lib/renderer/png'
+import PngRenderer, { PNG } from '#lib/renderer/png'
 import StreamMock from '#test/mocks/writable-stream'
 test('PNG renderer interface', () => {
   assert.strictEqual(typeof PngRenderer.render, 'function',
@@ -96,9 +95,9 @@ test('PNG renderToFile', async () => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
   const fileName = 'qrimage.png'
   const writeCalls = []
-  let fsStub = mock.method(fs, 'createWriteStream', (dest) => {
+  let fsStub = mock.method(fs, 'writeFile', (dest, buffer, cb) => {
     writeCalls.push(dest)
-    return new StreamMock()
+    process.nextTick(cb)
   })
 
   await new Promise((resolve, reject) => {
@@ -135,8 +134,8 @@ test('PNG renderToFile', async () => {
   })
 
   fsStub.mock.restore()
-  fsStub = mock.method(fs, 'createWriteStream', () => {
-    return new StreamMock().forceErrorOnWrite()
+  fsStub = mock.method(fs, 'writeFile', (dest, buffer, cb) => {
+    process.nextTick(cb, new Error('Fake error'))
   })
 
   await new Promise((resolve, reject) => {
@@ -154,15 +153,15 @@ test('PNG renderToFile', async () => {
   fsStub.mock.restore()
 })
 
-test('PNG renderToFileStream', (t) => {
+test('PNG renderToFileStream', async (t) => {
   const sampleQrData = QRCode.create('sample text', { version: 2 })
 
-  assert.doesNotThrow(() => {
-    PngRenderer.renderToFileStream(new StreamMock(), sampleQrData)
+  await assert.doesNotReject(() => {
+    return PngRenderer.renderToFileStream(new StreamMock(), sampleQrData)
   }, 'Should not throw with only qrData param')
 
-  assert.doesNotThrow(() => {
-    PngRenderer.renderToFileStream(new StreamMock(), sampleQrData, {
+  await assert.doesNotReject(() => {
+    return PngRenderer.renderToFileStream(new StreamMock(), sampleQrData, {
       margin: 10,
       scale: 1
     })

@@ -11,8 +11,7 @@ export default class WritableStream extends stream.Writable {
   }
 
   _write (data, encoding, cb) {
-    if (this.forceError) this.emit('error', new Error('Fake error'))
-    cb(this.forceError || null)
+    cb(this.forceError ? new Error('Fake error') : null)
   }
 
   close (cb) {

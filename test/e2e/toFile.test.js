@@ -4,7 +4,6 @@ import path from 'node:path'
 import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import QRCode from '#lib/index'
-import StreamMock from '#test/mocks/writable-stream'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -35,8 +34,8 @@ test('toFile png', async (t) => {
     type: 'png'
   })
 
-  const fsStub = mock.method(fs, 'createWriteStream', () => {
-    return new StreamMock().forceErrorOnWrite()
+  const fsStub = mock.method(fs, 'writeFile', (dest, buffer, cb) => {
+    process.nextTick(cb, new Error('Fake error'))
   })
 
   await QRCode.toFile(fileName, 'i am a pony!', {

@@ -43,23 +43,3 @@ test('BCH Digit', (t) => {
       'Should return correct BCH for value: ' + d.data)
   })
 })
-
-test('Set/Get SJIS function', (t) => {
-  assert.throws(() => { Utils.setToSJISFunction() },
-    'Should throw if param is not a function')
-
-  assert.ok(!Utils.isKanjiModeEnabled(),
-    'Kanji mode should be disabled if "toSJIS" function is not set')
-
-  const testFunc = function testFunc (c) {
-    return 'test_' + c
-  }
-
-  Utils.setToSJISFunction(testFunc)
-
-  assert.ok(Utils.isKanjiModeEnabled(),
-    'Kanji mode should be enabled if "toSJIS" function is set')
-
-  assert.strictEqual(Utils.toSJIS('a'), 'test_a',
-    'Should correctly call "toSJIS" function')
-})
