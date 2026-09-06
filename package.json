@@ -45,8 +45,8 @@
   },
   "devDependencies": {
     "canvas": "^3.2.3",
-    "eslint": "^10.5.0",
-    "globals": "^17.6.0",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
     "htmlparser2": "^12.0.0",
     "jsqr": "^1.4.0"
   },
@@ -61,7 +61,7 @@
     "node": ">=26.0.0"
   },
   "dependencies": {
-    "@eriksremess/pngjs": "^7.0.1"
+    "@eriksremess/pngjs": "^7.0.2"
   },
   "allowScripts": {
     "canvas@3.2.3": true
