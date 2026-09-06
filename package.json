@@ -1,7 +1,7 @@
 {
   "name": "@eriksremess/qrcode",
   "description": "QRCode / 2d Barcode API for Node.js",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "Ēriks Remess <eriks@remess.lv>",
   "contributors": [
     "Ryan Day <soldair@gmail.com>",
